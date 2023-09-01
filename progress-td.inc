@@ -271,7 +271,7 @@ stock bool: PlayerBar_SetMaxValue(playerid, PlayerBar: barid, Float:maxValue)
 *
 * Check progressbar exists
 */
-stock IsValidPlayerBar(playerid, PlayerBar: barid)
+stock bool: IsValidPlayerBar(playerid, PlayerBar: barid)
 {
     return Iter_Contains(barIterator[playerid], _:barid);
 }
