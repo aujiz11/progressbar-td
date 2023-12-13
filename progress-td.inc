@@ -25,12 +25,16 @@
 #endif
 #define _progresstd_included
 
-#if !defined _INC_open_mp
-	#error The <open.mp> library must be called first
+#if !defined _INC_a_samp
+    #tryinclude <open.mp>
 #endif
 
-#include <YSI_Data\y_iterate>
-#include <YSI_Coding\y_hooks>
+#if !defined _INC_open_mp
+    #define PlayerTextDrawColor             PlayerTextDrawColour
+    #define PlayerTextDrawBackgroundColor   PlayerTextDrawBackgroundColour
+#endif
+
+#tryinclude <YSI_Data\y_iterate>
 
 #define MAX_PLAYER_BARS         (_:30)
 #define INVALID_PLAYER_BAR      (PlayerBar:-1)
@@ -129,6 +133,7 @@ stock bool: PlayerBar_Render(playerid, PlayerBar: barid)
     PlayerTextDrawTextSize(playerid, barTextDraw[playerid][_:barid][barMain], pBarInfo[playerid][_:barid][barWidth], pBarInfo[playerid][_:barid][barHeight]);
     PlayerTextDrawAlignment(playerid, barTextDraw[playerid][_:barid][barMain], TEXT_DRAW_ALIGN_LEFT);
     PlayerTextDrawColour(playerid, barTextDraw[playerid][_:barid][barMain], pBarInfo[playerid][_:barid][barMainColour]);
+    PlayerTextDrawColor(playerid, barTextDraw[playerid][_:barid][barMain], pBarInfo[playerid][_:barid][barMainColour]);
     PlayerTextDrawSetShadow(playerid, barTextDraw[playerid][_:barid][barMain], 0);
     PlayerTextDrawSetOutline(playerid, barTextDraw[playerid][_:barid][barMain], 0);
     PlayerTextDrawBackgroundColour(playerid, barTextDraw[playerid][_:barid][barMain], 255);
@@ -277,11 +282,27 @@ stock bool: IsValidPlayerBar(playerid, PlayerBar: barid)
 }
 
 /*=.=.=.=.=.=.=.=.= Callbacks =.=.=.=.=.=.=.=.=*/
-hook OnPlayerDisconnect(playerid, reason)
+public OnPlayerDisconnect(playerid, reason)
 {
     foreach(new i: barIterator[playerid])
     {
         PlayerBar_Destroy(playerid, PlayerBar:i);
     }
-    return 1;
+    
+    #if defined _PTD_OnPlayerDisconnect
+        return _PTD_OnPlayerDisconnect(playerid, reason);
+    #else
+        return 1;
+    #endif
 }
+
+#if defined _ALS_OnPlayerDisconnect
+    #undef OnPlayerDisconnect
+#else
+    #define _ALS_OnPlayerDisconnect
+#endif
+
+#define OnPlayerDisconnect _PTD_OnPlayerDisconnect
+#if #defined _PTD_OnPlayerDisconnect
+    forward _PTD_OnPlayerDisconnect(playerid, reason)
+#endif
